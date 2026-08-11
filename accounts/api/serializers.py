@@ -4,6 +4,7 @@ from accounts.models import (
     User,
     PassengerProfile
 )
+from companies.models import TransportCompany
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -130,3 +131,62 @@ class AdminUserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+from companies.models import TransportCompany
+
+
+class AdminUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+
+        fields = [
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'phone',
+            'email',
+            'user_type',
+            'company',
+            'is_active'
+        ]
+
+        read_only_fields = [
+            'id'
+        ]
+
+    def validate(self, attrs):
+
+        user_type = attrs.get(
+            'user_type',
+            self.instance.user_type
+            if self.instance
+            else None
+        )
+
+        company = attrs.get(
+            'company',
+            self.instance.company
+            if self.instance
+            else None
+        )
+
+        if user_type == 'COMPANY_MANAGER' and company is None:
+
+            raise serializers.ValidationError({
+                'company':
+                'Company Manager must be assigned to a company.'
+            })
+
+        if user_type in [
+            'SYSTEM_ADMIN',
+            'PASSENGER'
+        ] and company is not None:
+
+            raise serializers.ValidationError({
+                'company':
+                'This user type should not be assigned to a company.'
+            })
+
+        return attrs

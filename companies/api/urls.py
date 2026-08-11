@@ -12,7 +12,10 @@ from .views import (
     MyCompanyEmployeeDetailAPIView,
 
     AdminCompanyListCreateAPIView,
-    AdminCompanyDetailAPIView
+    AdminCompanyDetailAPIView,
+
+    AdminVehicleListCreateAPIView,
+    AdminVehicleDetailAPIView
 )
 
 
@@ -84,5 +87,17 @@ urlpatterns = [
         'admin/companies/<int:pk>/',
         AdminCompanyDetailAPIView.as_view(),
         name='admin-company-detail'
+    ),
+
+    path(
+        'admin/vehicles/',
+        AdminVehicleListCreateAPIView.as_view(),
+        name='admin-vehicle-list'
+    ),
+
+    path(
+        'admin/vehicles/<int:pk>/',
+        AdminVehicleDetailAPIView.as_view(),
+        name='admin-vehicle-detail'
     ),
 ]

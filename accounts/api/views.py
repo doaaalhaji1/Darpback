@@ -10,6 +10,8 @@ from accounts.models import (
 from rest_framework import status
 
 from rest_framework import generics
+from accounts.models import User
+
 from .serializers import (
     RegisterSerializer,
     AdminUserSerializer
@@ -108,4 +110,28 @@ class AdminUserDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         IsAuthenticated,
         IsSystemAdmin
     ]
+    queryset = User.objects.all()
+
+class AdminUserListAPIView(generics.ListAPIView):
+
+    serializer_class = AdminUserSerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    queryset = User.objects.all().order_by('id')
+
+class AdminUserDetailAPIView(
+    generics.RetrieveUpdateAPIView
+):
+
+    serializer_class = AdminUserSerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
     queryset = User.objects.all()

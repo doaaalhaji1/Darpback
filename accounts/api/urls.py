@@ -7,7 +7,9 @@ from .views import (
 from .views import (
     ProfileAPIView,
     PassengerProfileAPIView,
-    RegisterAPIView
+    RegisterAPIView,
+    AdminUserListAPIView,
+    AdminUserDetailAPIView
 )
 
 urlpatterns = [
@@ -34,6 +36,17 @@ urlpatterns = [
     'admin/users/',
     AdminUserListCreateAPIView.as_view(),
     name='admin-users'
+    ),
+    path(
+        'admin/users/<int:pk>/',
+        AdminUserDetailAPIView.as_view(),
+        name='admin-user-detail'
+    ),
+
+    path(
+        'admin/users/',
+        AdminUserListAPIView.as_view(),
+        name='admin-user-list'
     ),
     path(
         'admin/users/<int:pk>/',

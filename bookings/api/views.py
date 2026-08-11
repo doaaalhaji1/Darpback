@@ -100,6 +100,22 @@ class BookingCreateAPIView(APIView):
     
 class BookingListAPIView(ListAPIView):
 
+    serializer_class = BookingSerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+    def get_queryset(self):
+
+        return Booking.objects.select_related(
+            'user',
+            'trip',
+            'trip__company'
+        ).all().order_by('-booking_date')
+
+class BookingDetailAPIView(RetrieveAPIView):
+
     queryset = Booking.objects.all()
 
     serializer_class = BookingSerializer
@@ -108,13 +124,6 @@ class BookingListAPIView(ListAPIView):
         IsAuthenticated,
         IsSystemAdmin
     ]
-
-class BookingDetailAPIView(RetrieveAPIView):
-
-    queryset = Booking.objects.all()
-
-    serializer_class = BookingSerializer
-
 class BookingCancelAPIView(APIView):
 
     permission_classes = [

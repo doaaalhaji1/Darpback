@@ -203,3 +203,36 @@ class BookingEmployeeSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class AdminVehicleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Vehicle
+        fields = [
+            'id',
+            'company',
+            'vehicle_type',
+            'seats_count'
+        ]
+
+    def validate_company(self, company):
+
+        if not TransportCompany.objects.filter(
+            id=company.id
+        ).exists():
+
+            raise serializers.ValidationError(
+                "Selected company does not exist."
+            )
+
+        return company
+
+    def validate_seats_count(self, seats_count):
+
+        if seats_count <= 0:
+
+            raise serializers.ValidationError(
+                "Seats count must be greater than zero."
+            )
+
+        return seats_count    

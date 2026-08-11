@@ -21,6 +21,25 @@ from invoices.models import Invoice
 
 from .serializers import TripSerializer
 
+from django.db.models import Count, Sum
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
+from accounts.models import User
+from accounts.permissions import IsSystemAdmin
+
+from companies.models import (
+    TransportCompany,
+    Vehicle
+)
+
+from trips.models import Trip
+from bookings.models import Booking
+from invoices.models import Invoice
+
 
 # ملاحظة (المسار ب): أُعيدت الفلترة حسب الشركة عبر Trip.company (FK جديد).
 # أُبقيت إصلاحات رؤية A: from_city/to_city نصّيان، لا trip_status، وإصلاح
@@ -359,3 +378,212 @@ class PaymentsReportAPIView(APIView):
             "pending_invoices": pending.count(),
             "total_amount": total_amount,
         })
+
+
+class SystemDashboardAPIView(APIView):
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    def get(self, request):
+
+        total_users = User.objects.count()
+
+        total_companies = TransportCompany.objects.count()
+
+        total_vehicles = Vehicle.objects.count()
+
+        total_trips = Trip.objects.count()
+
+        total_bookings = Booking.objects.count()
+
+        confirmed_bookings = Booking.objects.filter(
+            booking_status='CONFIRMED'
+        ).count()
+
+        pending_bookings = Booking.objects.filter(
+            booking_status='PENDING'
+        ).count()
+
+        cancelled_bookings = Booking.objects.filter(
+            booking_status='CANCELLED'
+        ).count()
+
+        total_revenue = Invoice.objects.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+
+        return Response({
+
+            "users": {
+                "total": total_users
+            },
+
+            "companies": {
+                "total": total_companies
+            },
+
+            "vehicles": {
+                "total": total_vehicles
+            },
+
+            "trips": {
+                "total": total_trips
+            },
+
+            "bookings": {
+                "total": total_bookings,
+                "confirmed": confirmed_bookings,
+                "pending": pending_bookings,
+                "cancelled": cancelled_bookings
+            },
+
+            "revenue": {
+                "total": total_revenue
+            }
+
+        })
+
+
+class SystemRevenueDashboardAPIView(APIView):
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    def get(self, request):
+
+        revenue = (
+            Invoice.objects
+            .values(
+                'booking__trip__company__id',
+                'booking__trip__company__company_name'
+            )
+            .annotate(
+                total_revenue=Sum('amount'),
+                invoices_count=Count('id')
+            )
+            .order_by('-total_revenue')
+        )
+
+        return Response(list(revenue))
+
+class SystemOccupancyReportAPIView(APIView):
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    def get(self, request):
+
+        trips = Trip.objects.select_related(
+            'company'
+        ).all()
+
+        results = []
+
+        for trip in trips:
+
+            capacity = trip.available_seats
+
+            booked = Booking.objects.filter(
+                trip=trip,
+                booking_status__in=[
+                    'PENDING',
+                    'CONFIRMED'
+                ]
+            ).count()
+
+            total_capacity = capacity + booked
+
+            occupancy_rate = 0
+
+            if total_capacity > 0:
+                occupancy_rate = round(
+                    (booked / total_capacity) * 100,
+                    2
+                )
+
+            company_id = None
+            company_name = "غير محددة"
+
+            if trip.company is not None:
+                company_id = trip.company.id
+                company_name = trip.company.company_name
+
+            results.append({
+
+                "trip_id": trip.id,
+
+                "company_id": company_id,
+
+                "company_name": company_name,
+
+                "capacity": total_capacity,
+
+                "booked_seats": booked,
+
+                "available_seats": max(
+                    capacity,
+                    0
+                ),
+
+                "occupancy_rate": occupancy_rate
+            })
+
+        return Response(results)
+
+class SystemPaymentsReportAPIView(APIView):
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    def get(self, request):
+
+        payments = (
+            Invoice.objects
+            .values('payment_type')
+            .annotate(
+                count=Count('id'),
+                total_amount=Sum('amount')
+            )
+            .order_by('-total_amount')
+        )
+
+        return Response(list(payments))
+
+class SystemTopTripsReportAPIView(APIView):
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    def get(self, request):
+
+        top_trips = (
+            Booking.objects
+            .filter(
+                booking_status__in=[
+                    'PENDING',
+                    'CONFIRMED'
+                ]
+            )
+            .values(
+                'trip__id',
+                'trip__company__id',
+                'trip__company__company_name'
+            )
+            .annotate(
+                bookings_count=Count('id')
+            )
+            .order_by('-bookings_count')[:10]
+        )
+
+        return Response(list(top_trips))

@@ -27,7 +27,8 @@ from .serializers import (
     CompanySerializer,
     VehicleSerializer,
     BookingEmployeeSerializer,
-    AdminCompanySerializer
+    AdminCompanySerializer,
+    AdminVehicleSerializer
 )
 
 
@@ -205,3 +206,27 @@ class AdminCompanyDetailAPIView(
     ]
 
     queryset = TransportCompany.objects.all()
+
+class AdminVehicleListCreateAPIView(
+    generics.ListCreateAPIView
+    ):
+    serializer_class = AdminVehicleSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+    def get_queryset(self):
+
+        return Vehicle.objects.select_related(
+            'company'
+        ).all().order_by('id')
+
+class AdminVehicleDetailAPIView(
+    generics.RetrieveUpdateDestroyAPIView
+    ):
+    serializer_class = AdminVehicleSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+    queryset = Vehicle.objects.all()

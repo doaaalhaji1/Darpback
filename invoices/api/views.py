@@ -14,6 +14,11 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.utils import timezone
+from invoices.models import Invoice
+
+from accounts.permissions import IsSystemAdmin
+
+from rest_framework.permissions import IsAuthenticated
 
 
 class InvoiceListAPIView(ListAPIView):
@@ -21,31 +26,30 @@ class InvoiceListAPIView(ListAPIView):
     serializer_class = InvoiceSerializer
 
     permission_classes = [
-        IsAuthenticated
+        IsAuthenticated,
+        IsSystemAdmin
     ]
 
     def get_queryset(self):
 
-        return Invoice.objects.filter(
-            booking__user=self.request.user
-        )
+        return Invoice.objects.select_related(
+            'booking',
+            'booking__user',
+            'booking__trip',
+            'booking__trip__company'
+        ).all().order_by('-id')
 
-
+    
 class InvoiceDetailAPIView(RetrieveAPIView):
+
+    queryset = Invoice.objects.all()
 
     serializer_class = InvoiceSerializer
 
     permission_classes = [
-        IsAuthenticated
+        IsAuthenticated,
+        IsSystemAdmin
     ]
-
-    def get_queryset(self):
-
-        return Invoice.objects.filter(
-            booking__user=self.request.user
-        )
-    
-
 class InvoicePayAPIView(APIView):
 
     permission_classes = [

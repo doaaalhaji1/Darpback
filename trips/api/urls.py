@@ -12,7 +12,13 @@ from .views import (
     RevenueDashboardAPIView,
     OccupancyReportAPIView,
     TopTripsReportAPIView,
-    PaymentsReportAPIView
+    PaymentsReportAPIView,
+    SystemDashboardAPIView,
+    SystemRevenueDashboardAPIView,
+    SystemOccupancyReportAPIView,
+    SystemPaymentsReportAPIView,
+    SystemTopTripsReportAPIView
+  
 )
 
 urlpatterns = [
@@ -91,6 +97,36 @@ urlpatterns = [
     name='payments-report'
     ),
 
+    path(
+        'admin/dashboard/',
+        SystemDashboardAPIView.as_view(),
+        name='system-dashboard'
+
+    ),
+
+    path(
+        'admin/dashboard/revenue/',
+        SystemRevenueDashboardAPIView.as_view(),
+        name='system-revenue-dashboard'
+    ),
+
+    path(
+        'admin/dashboard/occupancy/',
+        SystemOccupancyReportAPIView.as_view(),
+        name='system-occupancy-report'
+    ),
+
+    path(
+        'admin/dashboard/payments/',
+        SystemPaymentsReportAPIView.as_view(),
+        name='system-payments-report'
+    ),
+
+      path(
+        'admin/dashboard/top-trips/',
+        SystemTopTripsReportAPIView.as_view(),
+        name='system-top-trips'
+    ),
 
 ]
 
