@@ -1,19 +1,35 @@
 from django.urls import path
 
-from .views import CityListAPIView
+from .views import (
+    CompanyListAPIView,
+    CityListAPIView,
+    MyCompanyAPIView,
 
-from .views import MyCompanyAPIView
+    MyCompanyVehicleListCreateAPIView,
+    MyCompanyVehicleDetailAPIView,
+
+    MyCompanyEmployeeListCreateAPIView,
+    MyCompanyEmployeeDetailAPIView
+)
+
 
 urlpatterns = [
+
+    # ==========================
+    # Companies
+    # ==========================
+
+    path(
+        'companies/',
+        CompanyListAPIView.as_view(),
+        name='company-list'
+    ),
 
     path(
         'cities/',
-        CityListAPIView.as_view()
+        CityListAPIView.as_view(),
+        name='city-list'
     ),
-
-]
-
-urlpatterns = [
 
     path(
         'my-company/',
@@ -21,4 +37,37 @@ urlpatterns = [
         name='my-company'
     ),
 
+
+    # ==========================
+    # Vehicles
+    # ==========================
+
+    path(
+        'my-company/vehicles/',
+        MyCompanyVehicleListCreateAPIView.as_view(),
+        name='my-company-vehicles'
+    ),
+
+    path(
+        'my-company/vehicles/<int:pk>/',
+        MyCompanyVehicleDetailAPIView.as_view(),
+        name='my-company-vehicle-detail'
+    ),
+
+
+    # ==========================
+    # Booking Employees
+    # ==========================
+
+    path(
+        'my-company/employees/',
+        MyCompanyEmployeeListCreateAPIView.as_view(),
+        name='my-company-employees'
+    ),
+
+    path(
+        'my-company/employees/<int:pk>/',
+        MyCompanyEmployeeDetailAPIView.as_view(),
+        name='my-company-employee-detail'
+    ),
 ]

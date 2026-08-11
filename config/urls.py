@@ -70,11 +70,6 @@ urlpatterns = [
 
     path(
     'api/',
-    include('accounts.api.urls')
-    ),
-
-    path(
-    'api/',
     include('companies.api.urls')
     ),
 

@@ -10,12 +10,14 @@ from .views import (
     MyBookingsAPIView,
     EmployeeBookingAPIView,
     TripSeatsAPIView,
-    SeatLayoutAPIView
+    SeatLayoutAPIView,
+    MyCompanyBookingsAPIView
 )
 
 from .views import (
     GroupBookingAPIView
 )
+
 
 urlpatterns = [
 
@@ -78,4 +80,11 @@ urlpatterns = [
     name='seat-layout'
     ),
 
+    path(
+        'my-company/bookings/',
+        MyCompanyBookingsAPIView.as_view(),
+        name='my-company-bookings'
+    ),
+
 ]
+

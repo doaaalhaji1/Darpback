@@ -34,6 +34,7 @@ from .serializers import (
 
 from accounts.models import User
 from .serializers import EmployeeBookingSerializer
+from accounts.permissions import IsCompanyManager
 
 
 class BookingCreateAPIView(APIView):
@@ -583,3 +584,24 @@ class SeatLayoutAPIView(APIView):
             "layout": layout
 
         })
+
+
+class MyCompanyBookingsAPIView(ListAPIView):
+
+    serializer_class = BookingSerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsCompanyManager
+    ]
+
+    def get_queryset(self):
+
+        company = self.request.user.managed_company
+
+        return Booking.objects.filter(
+            trip__company=company
+        ).select_related(
+            'user',
+            'trip'
+        )    

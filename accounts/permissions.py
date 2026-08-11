@@ -59,3 +59,14 @@ class IsAdminOrCompanyManager(BasePermission):
             ]
 
         )
+
+
+class IsCompanyManager(BasePermission):
+
+    def has_permission(self, request, view):
+
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.user_type == 'COMPANY_MANAGER'
+        )
