@@ -79,8 +79,8 @@ urlpatterns = [
     ),
 
     path(
-    'api/',
-    include('accounts.api.urls')
+        'api/',
+        include('accounts.api.urls')
     )
 
 

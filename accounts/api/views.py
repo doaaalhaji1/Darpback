@@ -2,12 +2,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.models import PassengerProfile
+from accounts.models import (
+    User,
+    PassengerProfile
+)
 
 from rest_framework import status
 
 from rest_framework import generics
-from .serializers import RegisterSerializer
+from .serializers import (
+    RegisterSerializer,
+    AdminUserSerializer
+)
+from accounts.permissions import IsSystemAdmin
 
 
 class ProfileAPIView(APIView):
@@ -80,3 +87,25 @@ class PassengerProfileAPIView(APIView):
 class RegisterAPIView(generics.CreateAPIView):
 
     serializer_class = RegisterSerializer
+
+class AdminUserListCreateAPIView(generics.ListCreateAPIView):
+
+    serializer_class = AdminUserSerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    def get_queryset(self):
+        return User.objects.all().order_by('id')
+
+class AdminUserDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+
+    serializer_class = AdminUserSerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+    queryset = User.objects.all()

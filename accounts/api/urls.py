@@ -1,4 +1,8 @@
 from django.urls import path
+from .views import (
+    AdminUserListCreateAPIView,
+    AdminUserDetailAPIView
+)
 
 from .views import (
     ProfileAPIView,
@@ -24,6 +28,17 @@ urlpatterns = [
         'passenger-profile/',
         PassengerProfileAPIView.as_view(),
         name='passenger-profile'
+    ),
+
+    path(
+    'admin/users/',
+    AdminUserListCreateAPIView.as_view(),
+    name='admin-users'
+    ),
+    path(
+        'admin/users/<int:pk>/',
+        AdminUserDetailAPIView.as_view(),
+        name='admin-user-detail'
     ),
 
 ]

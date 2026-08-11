@@ -9,6 +9,7 @@ from companies.models import (
 from accounts.models import User
 
 
+
 class CitySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -25,6 +26,94 @@ class CompanySerializer(serializers.ModelSerializer):
         model = TransportCompany
 
         fields = '__all__'
+
+
+
+class AdminCompanySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TransportCompany
+
+        fields = [
+            'id',
+            'company_name',
+            'phone',
+            'description',
+            'manager'
+        ]
+
+    def validate_manager(self, manager):
+
+        if manager.user_type != 'COMPANY_MANAGER':
+
+            raise serializers.ValidationError(
+                "Selected manager must be a COMPANY_MANAGER."
+            )
+
+        return manager
+
+    def create(self, validated_data):
+
+        manager = validated_data['manager']
+
+        company = TransportCompany.objects.create(
+            **validated_data
+        )
+
+        manager.company = company
+        manager.save(
+            update_fields=['company']
+        )
+
+        return company
+
+    def update(self, instance, validated_data):
+
+        old_manager = instance.manager
+
+        manager = validated_data.get(
+            'manager',
+            old_manager
+        )
+
+        if manager.user_type != 'COMPANY_MANAGER':
+
+            raise serializers.ValidationError(
+                "Selected manager must be a COMPANY_MANAGER."
+            )
+
+        instance.company_name = validated_data.get(
+            'company_name',
+            instance.company_name
+        )
+
+        instance.phone = validated_data.get(
+            'phone',
+            instance.phone
+        )
+
+        instance.description = validated_data.get(
+            'description',
+            instance.description
+        )
+
+        instance.manager = manager
+
+        instance.save()
+
+        manager.company = instance
+        manager.save(
+            update_fields=['company']
+        )
+
+        if old_manager != manager:
+
+            old_manager.company = None
+            old_manager.save(
+                update_fields=['company']
+            )
+
+        return instance
 
 
 # ==========================================

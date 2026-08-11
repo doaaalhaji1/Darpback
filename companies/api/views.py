@@ -4,6 +4,7 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView
 )
+from rest_framework import generics
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -17,14 +18,16 @@ from accounts.models import User
 
 from accounts.permissions import (
     IsAdminOrCompanyManager,
-    IsCompanyManager
+    IsCompanyManager,
+    IsSystemAdmin
 )
 
 from .serializers import (
     CitySerializer,
     CompanySerializer,
     VehicleSerializer,
-    BookingEmployeeSerializer
+    BookingEmployeeSerializer,
+    AdminCompanySerializer
 )
 
 
@@ -174,3 +177,31 @@ class MyCompanyEmployeeDetailAPIView(
             company=company,
             user_type='BOOKING_EMPLOYEE'
         )
+
+class AdminCompanyListCreateAPIView(
+    generics.ListCreateAPIView
+):
+
+    serializer_class = AdminCompanySerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    def get_queryset(self):
+
+        return TransportCompany.objects.all().order_by('id')
+
+class AdminCompanyDetailAPIView(
+    generics.RetrieveUpdateDestroyAPIView
+):
+
+    serializer_class = AdminCompanySerializer
+
+    permission_classes = [
+        IsAuthenticated,
+        IsSystemAdmin
+    ]
+
+    queryset = TransportCompany.objects.all()
