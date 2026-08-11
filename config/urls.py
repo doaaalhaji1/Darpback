@@ -78,6 +78,11 @@ urlpatterns = [
     include('invoices.api.urls')
     ),
 
+    path(
+    'api/',
+    include('accounts.api.urls')
+    )
+
 
 ]
 
