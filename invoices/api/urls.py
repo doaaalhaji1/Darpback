@@ -3,7 +3,8 @@ from django.urls import path
 from .views import (
     InvoiceListAPIView,
     InvoiceDetailAPIView,
-    InvoicePayAPIView
+    InvoicePayAPIView,
+    MyInvoicesAPIView,  
 )
 
 urlpatterns = [
@@ -13,6 +14,8 @@ urlpatterns = [
         InvoiceListAPIView.as_view(),
         name='invoice-list'
     ),
+        path('my-invoices/', MyInvoicesAPIView.as_view(), name='my-invoices'),   # ← والمسار
+
 
     path(
         'invoices/<int:pk>/',

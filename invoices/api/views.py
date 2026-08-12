@@ -94,3 +94,11 @@ class InvoicePayAPIView(APIView):
                 "message": "Payment Completed Successfully"
             }
         )
+class MyInvoicesAPIView(ListAPIView):
+    serializer_class = InvoiceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Invoice.objects.select_related(
+            'booking', 'booking__trip', 'booking__trip__company'
+        ).filter(booking__user=self.request.user).order_by('-id')
