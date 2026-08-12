@@ -145,15 +145,13 @@ class BookingCancelAPIView(APIView):
 
         if (
             request.user.user_type != 'SYSTEM_ADMIN'
-            and booking.user != request.user
-        ):
-
-            return Response(
-                {
-                    "error": "You are not allowed to cancel this booking"
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
+           and booking.user != request.user
+           and booking.created_by != request.user
+       ):
+           return Response(
+           {"error": "You are not allowed to cancel this booking"},
+            status=status.HTTP_403_FORBIDDEN
+           )
 
         if booking.booking_status == 'CANCELLED':
 
@@ -614,3 +612,23 @@ class MyCompanyBookingsAPIView(ListAPIView):
             'user',
             'trip'
         )    
+class EmployeeBookingsListAPIView(ListAPIView):
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.user_type != 'BOOKING_EMPLOYEE':
+            return Booking.objects.none()
+
+        qs = Booking.objects.select_related('user', 'trip', 'trip__company').filter(
+            created_by=user
+        ).order_by('-booking_date')
+
+        phone = self.request.query_params.get('phone')
+
+        if phone:
+            qs = qs.filter(user__phone=phone)
+
+        return qs

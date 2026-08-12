@@ -11,7 +11,8 @@ from .views import (
     EmployeeBookingAPIView,
     TripSeatsAPIView,
     SeatLayoutAPIView,
-    MyCompanyBookingsAPIView
+    MyCompanyBookingsAPIView,
+    EmployeeBookingsListAPIView
 )
 
 from .views import (
@@ -85,6 +86,8 @@ urlpatterns = [
         MyCompanyBookingsAPIView.as_view(),
         name='my-company-bookings'
     ),
+    path('employee/bookings/', EmployeeBookingsListAPIView.as_view(), name='employee-bookings'),
+
 
 ]
 
