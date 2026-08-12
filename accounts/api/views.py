@@ -41,7 +41,9 @@ class ProfileAPIView(APIView):
 
             "user_type": request.user.user_type,
 
-            "gender": gender
+            "gender": gender,
+            
+            "company": request.user.company_id,
 
         })
     
